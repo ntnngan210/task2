@@ -8,22 +8,22 @@
 
 	if(isset($_POST['add'])){
 		$isbn = trim($_POST['isbn']);
-		$isbn = mysqli_real_escape_string($conn, $isbn);
+
 		
 		$title = trim($_POST['title']);
-		$title = mysqli_real_escape_string($conn, $title);
+
 
 		$author = trim($_POST['author']);
-		$author = mysqli_real_escape_string($conn, $author);
+
 		
 		$descr = trim($_POST['descr']);
-		$descr = mysqli_real_escape_string($conn, $descr);
+
 		
 		$price = floatval(trim($_POST['price']));
-		$price = mysqli_real_escape_string($conn, $price);
+
 		
 		$publisher = trim($_POST['publisher']);
-		$publisher = mysqli_real_escape_string($conn, $publisher);
+
 
 		// add image
 		if(isset($_FILES['image']) && $_FILES['image']['name'] != ""){
@@ -37,26 +37,29 @@
 		// find publisher and return pubid
 		// if publisher is not in db, create new
 		$findPub = "SELECT * FROM publisher WHERE publisher_name = '$publisher'";
-		$findResult = mysqli_query($conn, $findPub);
+        $cmd = $conn->prepare($findPub);
+        $cmd->execute();
+        $findResult = $cmd->fetch();
 		if(!$findResult){
 			// insert into publisher table and return id
 			$insertPub = "INSERT INTO publisher(publisher_name) VALUES ('$publisher')";
-			$insertResult = mysqli_query($conn, $insertPub);
+            $cmd = $conn->prepare($findPub);
+            $insertResult = $cmd->execute();
 			if(!$insertResult){
-				echo "Can't add new publisher " . mysqli_error($conn);
+				echo "Can't add new publisher ";
 				exit;
 			}
-			$publisherid = mysql_insert_id($conn);
+            $id = $conn->lastInsertId();
 		} else {
-			$row = mysqli_fetch_assoc($findResult);
-			$publisherid = $row['publisherid'];
+			$publisherid = $findResult['publisherid'];
 		}
 
 
 		$query = "INSERT INTO books VALUES ('" . $isbn . "', '" . $title . "', '" . $author . "', '" . $image . "', '" . $descr . "', '" . $price . "', '" . $publisherid . "')";
-		$result = mysqli_query($conn, $query);
+        $cmd = $conn->prepare($findPub);
+        $result = $cmd->execute();
 		if(!$result){
-			echo "Can't add new data " . mysqli_error($conn);
+			echo "Can't add new data ";
 			exit;
 		} else {
 			header("Location: admin_book.php");
@@ -99,6 +102,5 @@
 	</form>
 	<br/>
 <?php
-	if(isset($conn)) {mysqli_close($conn);}
 	require_once "./template/footer.php";
 ?>

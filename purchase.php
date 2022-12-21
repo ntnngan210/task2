@@ -38,7 +38,7 @@
 	    	<?php
 			    foreach($_SESSION['cart'] as $isbn => $qty){
 					$conn = db_connect();
-					$book = mysqli_fetch_assoc(getBookByIsbn($conn, $isbn));
+					$book = getBookByIsbn($conn, $isbn);
 			?>
 		<tr>
 			<td><?php echo $book['book_title'] . " by " . $book['book_author']; ?></td>
@@ -116,6 +116,5 @@
 	} else {
 		echo "<p class=\"text-warning\">Your cart is empty! Please make sure you add some books in it!</p>";
 	}
-	if(isset($conn)){ mysqli_close($conn); }
 	require_once "./template/footer.php";
 ?>

@@ -45,9 +45,10 @@
 		$bookprice = getbookprice($isbn);
 		$query = "INSERT INTO order_items VALUES 
 		('$orderid', '$isbn', '$bookprice', '$qty')";
-		$result = mysqli_query($conn, $query);
+        $cmd = $conn->prepare($query);
+        $result = $cmd->execute();
 		if(!$result){
-			echo "Insert value false!" . mysqli_error($conn2);
+			echo "Insert value false!" ;
 			exit;
 		}
 	}
@@ -58,8 +59,6 @@
 	Your cart has been empty.</p>
 
 <?php
-	if(isset($conn)){
-		mysqli_close($conn);
-	}
+
 	require_once "./template/footer.php";
 ?>

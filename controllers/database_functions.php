@@ -1,112 +1,150 @@
 <?php
-	function db_connect(){
-		$conn = mysqli_connect("localhost", "root", "", "www_project");
-		if(!$conn){
-			echo "Can't connect database " . mysqli_connect_error($conn);
-			exit;
-		}
-		return $conn;
-	}
+include_once './database/dbhelper.php';
+function db_connect()
+{
+    $conn = new Database(null, null, null, null);
+    return $conn->getConnect();
+}
 
 
-	function getBookByIsbn($conn, $isbn){
-		$query = "SELECT book_title, book_author, book_price FROM books WHERE book_isbn = '$isbn'";
-		$result = mysqli_query($conn, $query);
-		if(!$result){
-			echo "Can't retrieve data " . mysqli_error($conn);
-			exit;
-		}
-		return $result;
-	}
+function getBookByIsbn($isbn)
+{
+    try {
+        $conn = db_connect();
+        $query = "SELECT book_title, book_author, book_price FROM books WHERE book_isbn =:isbn";
+        $cmd = $conn->prepare($query);
+        $cmd->bindValue(":isbn", $isbn);
+        $cmd->execute();
+        $result = $cmd->fetch();
+        return $result;
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
 
-	function getOrderId($conn, $customerid){
-		$query = "SELECT orderid FROM orders WHERE customerid = '$customerid'";
-		$result = mysqli_query($conn, $query);
-		if(!$result){
-			echo "retrieve data failed!" . mysqli_error($conn);
-			exit;
-		}
-		$row = mysqli_fetch_assoc($result);
-		return $row['orderid'];
-	}
+}
 
-	function insertIntoOrder($conn, $customerid, $total_price, $date, $ship_name, $ship_address, $ship_city, $ship_zip_code, $ship_country){
-		$query = "INSERT INTO orders VALUES 
+function getOrderId($conn, $customerid)
+{
+    try {
+        $conn = db_connect();
+        $query = "SELECT orderid FROM orders WHERE customerid = '$customerid'";
+        $cmd = $conn->prepare($query);
+        $cmd->execute();
+        $result = $cmd->fetch();
+        return $result['orderid'];
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
+}
+
+function insertIntoOrder($conn, $customerid, $total_price, $date, $ship_name, $ship_address, $ship_city, $ship_zip_code, $ship_country)
+{
+    try {
+        $conn = db_connect();
+        $query = "INSERT INTO orders VALUES 
 		('', '" . $customerid . "', '" . $total_price . "', '" . $date . "', '" . $ship_name . "', '" . $ship_address . "', '" . $ship_city . "', '" . $ship_zip_code . "', '" . $ship_country . "')";
-		$result = mysqli_query($conn, $query);
-		if(!$result){
-			echo "Insert orders failed " . mysqli_error($conn);
-			exit;
-		}
-	}
+        $cmd = $conn->prepare($query);
+        $cmd->execute();
+        $id = $conn->lastInsertId();
+        return $id;
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
+}
 
-	function getbookprice($isbn){
-		$conn = db_connect();
-		$query = "SELECT book_price FROM books WHERE book_isbn = '$isbn'";
-		$result = mysqli_query($conn, $query);
-		if(!$result){
-			echo "get book price failed! " . mysqli_error($conn);
-			exit;
-		}
-		$row = mysqli_fetch_assoc($result);
-		return $row['book_price'];
-	}
+function getbookprice($isbn)
+{
+    try {
+        $conn = db_connect();
+        $query = "SELECT book_price FROM books WHERE book_isbn = '$isbn'";
+        $cmd = $conn->prepare($query);
+        $cmd->execute();
+        $result = $cmd->fetch();
+        return $result['book_price'];
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
+}
 
-	function getCustomerId($name, $address, $city, $zip_code, $country){
-		$conn = db_connect();
-		$query = "SELECT customerid from customers WHERE 
+function getCustomerId($name, $address, $city, $zip_code, $country)
+{
+    try {
+        $conn = db_connect();
+        $query = "SELECT customerid from customers WHERE 
 		name = '$name' AND 
 		address= '$address' AND 
 		city = '$city' AND 
 		zip_code = '$zip_code' AND 
 		country = '$country'";
-		$result = mysqli_query($conn, $query);
-		// if there is customer in db, take it out
-		if($result){
-			$row = mysqli_fetch_assoc($result);
-			return $row['customerid'];
-		} else {
-			return null;
-		}
-	}
+        $cmd = $conn->prepare($query);
+        $cmd->execute();
+        $result = $cmd->fetch();
+        return $result['customerid'];
+        // if there is customer in db, take it out
 
-	function setCustomerId($name, $address, $city, $zip_code, $country){
-		$conn = db_connect();
-		$query = "INSERT INTO customers VALUES 
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
+}
+
+function setCustomerId($name, $address, $city, $zip_code, $country)
+{
+    try {
+        $conn = db_connect();
+        $query = "INSERT INTO customers VALUES 
 			('', '" . $name . "', '" . $address . "', '" . $city . "', '" . $zip_code . "', '" . $country . "')";
 
-		$result = mysqli_query($conn, $query);
-		if(!$result){
-			echo "insert false !" . mysqli_error($conn);
-			exit;
-		}
-		$customerid = mysqli_insert_id($conn);
-		return $customerid;
-	}
+        $cmd = $conn->prepare($query);
+        $cmd->execute();
+        $id = $conn->lastInsertId();
+        return $id;
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
+}
 
-	function getPubName($conn, $pubid){
-		$query = "SELECT publisher_name FROM publisher WHERE publisherid = '$pubid'";
-		$result = mysqli_query($conn, $query);
-		if(!$result){
-			echo "Can't retrieve data " . mysqli_error($conn);
-			exit;
-		}
-		if(mysqli_num_rows($result) == 0){
-			echo "Empty books ! Something wrong! check again";
-			exit;
-		}
+function getPubName($conn, $pubid)
+{
+    try {
+        $conn = db_connect();
 
-		$row = mysqli_fetch_assoc($result);
-		return $row['publisher_name'];
-	}
+        $query = "SELECT publisher_name FROM publisher WHERE publisherid = '$pubid'";
+        $cmd = $conn->prepare($query);
+        $cmd->execute();
+        $result = $cmd->fetch();
+        return $result['publisher_name'];
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
+}
 
-	function getAll($conn){
-		$query = "SELECT * from books ORDER BY book_isbn DESC";
-		$result = mysqli_query($conn, $query);
-		if(!$result){
-			echo "Can't retrieve data " . mysqli_error($conn);
-			exit;
-		}
-		return $result;
-	}
+function getAll($conn)
+{
+    try {
+    $conn = db_connect();
+    $query = "SELECT * from books ORDER BY book_isbn DESC";
+        $cmd = $conn->prepare($query);
+        $cmd->execute();
+        $result = $cmd->fetchAll();
+    } catch (PDOException $e) {
+        $error_message = $e->getMessage();
+        echo "<p>Lỗi truy vấn: $error_message</p>";
+        exit();
+    }
+}
+
 ?>
