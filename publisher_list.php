@@ -6,7 +6,7 @@ $conn = db_connect();
 $query = "SELECT * FROM publisher ORDER BY publisherid";
 $cmd = $conn->prepare($query);
 $cmd->execute();
-$result = $cmd->fetch();
+$result = $cmd->fetchAll();
 if (!$result) {
     echo "Can't retrieve data ";
     exit;
@@ -15,24 +15,25 @@ if (count($result) == 0) {
     echo "Empty publisher ! Something wrong! check again";
     exit;
 }
-
+//var_dump($result);
+//exit();
 $title = "List Of Publishers";
 require "./template/header.php";
 ?>
     <p class="lead">List of Publisher</p>
     <ul>
         <?php
-        while ($row = $result) {
+        foreach ($result as $row) {
             $count = 0;
             $query = "SELECT publisherid FROM books";
             $cmd = $conn->prepare($query);
             $cmd->execute();
-            $result2 = $cmd->fetch();
+            $result2 = $cmd->fetchAll();
             if (!$result2) {
-                echo "Can't retrieve data " ;
+                echo "Can't retrieve data ";
                 exit;
             }
-            while ($pubInBook = $result2) {
+            foreach ($result2 as $pubInBook) {
                 if ($pubInBook['publisherid'] == $row['publisherid']) {
                     $count++;
                 }
