@@ -16,7 +16,7 @@ $pubName = getPubName($conn, $pubid);
 $query = "SELECT book_isbn, book_title, book_image FROM books WHERE publisherid = '$pubid'";
 $cmd = $conn->prepare($query);
 $cmd->execute();
-$result = $cmd->fetch();
+$result = $cmd->fetchAll();
 if (!$result) {
     echo "Can't retrieve data ";
     exit;
@@ -30,7 +30,7 @@ $title = "Books Per Publisher";
 require "./template/header.php";
 ?>
     <p class="lead"><a href="publisher_list.php">Publishers</a> > <?php echo $pubName; ?></p>
-<?php while ($row = $result) {
+<?php foreach ($result as $row) {
     ?>
     <div class="row">
         <div class="col-md-3">
